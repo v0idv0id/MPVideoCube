@@ -29,18 +29,18 @@ This is an example for how to use libmpv (mpv) for creating video textures on Op
 
 ## Dependencies
 * Main dependencies: 
-  * libmpv-dev 
+  * libmpv-dev  (at least version 0.30 and with opengl enabled)
   * libglfw3-dev
   * youtube-dl
 
 ### Optional mpv-build 
 Please do not do this unless you know what you are doing. 
 
-I recommend compile mpv from scratch using https://github.com/mpv-player/mpv-build.git but this is not for the faint hearted. I included my compile settings in the assets folder in case someone needs them. Please note that mpv does not "explicitly" (stop and show) warn about missing libs that are not absolutly required using the configure process. Use the "scripts/mpv-config" script in the mpv-build to rerun and check.
+I recommend compile mpv from scratch using https://github.com/mpv-player/mpv-build.git but this is not for the faint hearted. I included my compile settings in the assets folder in case someone needs them. Please note that mpv does not "explicitly" (stop and show) warn about missing libs that are not absolutly required using the configure process. Use the "scripts/ffmpeg-config" and "scripts/mpv-config" script in the mpv-build to rerun and check. Use the "./install" to install and make sure you run a "ldconfig" after. Removing the system installation of mpv and libmpv is recommended (```apt-get remove mpv libmpv-dev```)
 
 ## Installation / Compile
 * make sure you do fullfill the requirements: 
-  * ``` sudo apt-get install libmpv-dev libglfw3-dev ```
+  * ``` sudo apt-get install libmpv-dev libglfw3-dev build-essential ```
 * To compile the demonstration just use:
   * ``` make  ```
 * To run it, use the demonstration commands or your own video file:
