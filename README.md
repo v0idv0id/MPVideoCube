@@ -5,6 +5,7 @@
   - [Dependencies](#dependencies)
     - [Optional mpv-build](#optional-mpv-build)
   - [Installation / Compile](#installation--compile)
+    - [If compile fails but you want to know how it looks like](#if-compile-fails-but-you-want-to-know-how-it-looks-like)
   - [References](#references)
   - [License and Author](#license-and-author)
 
@@ -29,18 +30,18 @@ This is an example for how to use libmpv (mpv) for creating video textures on Op
 
 ## Dependencies
 * Main dependencies: 
-  * libmpv-dev 
+  * libmpv-dev  (at least version 0.30 and with opengl enabled)
   * libglfw3-dev
   * youtube-dl
 
 ### Optional mpv-build 
 Please do not do this unless you know what you are doing. 
 
-I recommend compile mpv from scratch using https://github.com/mpv-player/mpv-build.git but this is not for the faint hearted. I included my compile settings in the assets folder in case someone needs them. Please note that mpv does not "explicitly" (stop and show) warn about missing libs that are not absolutly required using the configure process. Use the "scripts/mpv-config" script in the mpv-build to rerun and check.
+I recommend compile mpv from scratch using https://github.com/mpv-player/mpv-build.git but this is not for the faint hearted. I included my compile settings in the assets folder in case someone needs them. Please note that mpv does not "explicitly" (stop and show) warn about missing libs that are not absolutly required using the configure process. Use the "scripts/ffmpeg-config" and "scripts/mpv-config" script in the mpv-build to rerun and check. Use the "./install" to install and make sure you run a "ldconfig" after. Removing the system installation of mpv and libmpv is recommended (```apt-get remove mpv libmpv-dev```)
 
 ## Installation / Compile
 * make sure you do fullfill the requirements: 
-  * ``` sudo apt-get install libmpv-dev libglfw3-dev ```
+  * ``` sudo apt-get install libmpv-dev libglfw3-dev build-essential ```
 * To compile the demonstration just use:
   * ``` make  ```
 * To run it, use the demonstration commands or your own video file:
@@ -49,7 +50,11 @@ I recommend compile mpv from scratch using https://github.com/mpv-player/mpv-bui
   * ``` ./rundemo-youtube.sh ```  (This only works if youtube-dl is installed and working!)
   * ``` ./mpvideocube myvideofile.mp4 ``` (try with your own video files)
 
-If the spinning cubes stay blackbut you here the audio then the rendering of the video is broken. This can be due to the codec of the video and/or the limitations of the HW-accel. Check the output in the console.
+If the spinning cubes stay black but you here the audio then the rendering of the video is broken. This can be due to the codec of the video and/or the limitations of the HW-accel. Check the output in the console.
+
+### If compile fails but you want to know how it looks like
+
+If you want to know how the result looks like but you have problems to compile the program then take a look at the **assets/how-it-looks-like.mkv** video. This is is a screen capture of the program running.
 
 ## References
 * The main OpenGL concept is based on the examples from https://www.learnopengl.com

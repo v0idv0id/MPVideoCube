@@ -1,7 +1,4 @@
 --enable-libx264
---enable-cuda 
---enable-cuvid 
---enable-nvenc 
 --enable-nonfree 
 --extra-cflags=-I/usr/local/cuda/include  
 --extra-ldflags=-L/usr/local/cuda/lib64

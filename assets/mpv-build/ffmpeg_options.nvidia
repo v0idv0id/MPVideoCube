@@ -1,0 +1,15 @@
+--enable-libx264
+--enable-cuda 
+--enable-cuvid 
+--enable-nvenc 
+--enable-nonfree 
+--extra-cflags=-I/usr/local/cuda/include  
+--extra-ldflags=-L/usr/local/cuda/lib64
+--enable-libx264
+--enable-vaapi
+--enable-libvorbis 
+--enable-libvpx 
+--cpu=native 
+--enable-opengl 
+--enable-libx265 
+
