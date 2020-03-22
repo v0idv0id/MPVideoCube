@@ -5,6 +5,7 @@
   - [Dependencies](#dependencies)
     - [Optional mpv-build](#optional-mpv-build)
   - [Installation / Compile](#installation--compile)
+    - [If compile fails but you want to know how it looks like](#if-compile-fails-but-you-want-to-know-how-it-looks-like)
   - [References](#references)
   - [License and Author](#license-and-author)
 
@@ -49,7 +50,11 @@ I recommend compile mpv from scratch using https://github.com/mpv-player/mpv-bui
   * ``` ./rundemo-youtube.sh ```  (This only works if youtube-dl is installed and working!)
   * ``` ./mpvideocube myvideofile.mp4 ``` (try with your own video files)
 
-If the spinning cubes stay blackbut you here the audio then the rendering of the video is broken. This can be due to the codec of the video and/or the limitations of the HW-accel. Check the output in the console.
+If the spinning cubes stay black but you here the audio then the rendering of the video is broken. This can be due to the codec of the video and/or the limitations of the HW-accel. Check the output in the console.
+
+### If compile fails but you want to know how it looks like
+
+If you want to know how the result looks like but you have problems to compile the program then take a look at the **assets/how-it-looks-like.mkv** video. This is is a screen capture of the program running.
 
 ## References
 * The main OpenGL concept is based on the examples from https://www.learnopengl.com
