@@ -11,6 +11,10 @@
 
 This is an example for how to use libmpv (mpv) for creating video textures on OpenGL objects. There are a lot of examples but AFAIK none of them shows how to combine "basic" OpenGL objects and video textures in a modern way.
 
+Click on the image below to see the screen capture video of the program on youtube:
+
+[![MPVideoCube - Example for how to use libmpv (mpv) for creating OpenGL video textures](http://img.youtube.com/vi/tUKCxvFJ0Sg/0.jpg)](https://www.youtube.com/watch?v=tUKCxvFJ0Sg "MPVideoCube - Example for how to use libmpv (mpv) for creating OpenGL video textures")
+
 ## How it works
 * GLFW is used for the the window creation, event handling and  OpenGL context creation.
 * libmpv is used to create a render context - this is actually the "Video to Texture" transfer/method. HW-accel is enabled, if it works depends on system and hardware.
