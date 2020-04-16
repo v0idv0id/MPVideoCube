@@ -1,7 +1,7 @@
 
 # A very NAIVE Makefile
 
-CFLAGS=-Iinclude/ -std=c++11 -Wall -pedantic -Werror
+CFLAGS=-Iinclude/ -std=c++11 -Wall -pedantic -Werror -O3
 LDFLAGS=-lglfw -ldl -lmpv
 
 all:

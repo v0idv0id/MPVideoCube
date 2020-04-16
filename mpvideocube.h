@@ -11,6 +11,7 @@
 #include <mpv/client.h>
 #include <mpv/render_gl.h>
 
+#include <unistd.h>
 #include <shader.h>
 #include <camera.h>
 
@@ -35,7 +36,8 @@ unsigned int quadVAO, quadVBO;
 unsigned int cubeVAO, cubeVBO;
 
 float deltaTime, lastFrame;
-
+unsigned int fcount = 0;
+bool animation=true;
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
 static void *get_proc_address(void *ctx, const char *name);
@@ -98,5 +100,5 @@ float quadVertices[] = {
 
 static void on_mpv_render_update(void *ctx);
 static void on_mpv_events(void *ctx);
-
+unsigned int wakeup = 0;
 #endif

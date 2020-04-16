@@ -32,6 +32,9 @@ Click on the image below to see the screen capture video of the program on youtu
   * The CUBE is spinning and moving
   * The QUAD is scaled 
 
+* Whenever there is a new frame ready to render ```on_mpv_render_update``` will be called which sets the ```wakeup``` flag. This enables the  ```mpv_render_context_render``` path in the main loop. Please note that we have to call the ```glViewport``` every time after the ```mpv_render_context_render()``` in order to avoid strange FBO rescaling. Since the main render loop which renders the cube and the screen loop independet of the blocking ```mpv_render_context_render()``` function the framerate is locked by the programmatic 100fps or the vsync. So a low FPS video does not make the main loop slower.
+
+
 ## Dependencies
 * Main dependencies: 
   * libmpv-dev  (at least version 0.30 and with opengl enabled)
@@ -55,6 +58,8 @@ I recommend compile mpv from scratch using https://github.com/mpv-player/mpv-bui
   * ``` ./mpvideocube myvideofile.mp4 ``` (try with your own video files)
 
 If the spinning cubes stay black but you here the audio then the rendering of the video is broken. This can be due to the codec of the video and/or the limitations of the HW-accel. Check the output in the console.
+
+To stop the animation hold the SPACE key.
 
 ### If compile fails but you want to know how it looks like
 
