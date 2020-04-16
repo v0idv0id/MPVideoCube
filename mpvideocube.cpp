@@ -5,7 +5,8 @@
 
 int main(int argc, char const *argv[])
 {
-    if(argc<2) {
+    if (argc < 2)
+    {
         std::cout << "Usage: " << argv[0] << " videofilename" << std::endl;
         return -1;
     }
@@ -21,6 +22,7 @@ int main(int argc, char const *argv[])
     }
 
     glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -44,12 +46,13 @@ int main(int argc, char const *argv[])
         nullptr,
         nullptr};
 
-    int adv{1};
+    int adv{1}; // we will use the update callback
 
     mpv_render_param render_param[]{
         {MPV_RENDER_PARAM_API_TYPE, const_cast<char *>(MPV_RENDER_API_TYPE_OPENGL)},
         {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &opengl_init_params},
         {MPV_RENDER_PARAM_ADVANCED_CONTROL, &adv},
+        {MPV_RENDER_PARAM_BLOCK_FOR_TARGET_TIME, (int)0},
         {MPV_RENDER_PARAM_INVALID, nullptr},
     };
 
@@ -67,7 +70,9 @@ int main(int argc, char const *argv[])
     mpv_set_option_string(mpv, "loop", "");
     mpv_set_option_string(mpv, "gpu-api", "opengl");
     mpv_set_option_string(mpv, "hwdec", "auto");
+    mpv_set_option_string(mpv, "vd-lavc-dr", "yes");
     mpv_set_option_string(mpv, "terminal", "yes");
+    // mpv_set_option_string(mpv, "video-timing-offset", "0"); // this need manual fps adjustment  mpv_render_frame_info()
 
     // SHADER creation
 
@@ -75,7 +80,6 @@ int main(int argc, char const *argv[])
     Shader *screenShader = new Shader("shaders/screen_vs.glsl", "shaders/screen_fs.glsl");
 
     // CUBE Vertex Array Object (VAO) and Vertex Buffer Object (VBO)
-    unsigned int cubeVAO, cubeVBO;
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &cubeVBO);
     glBindVertexArray(cubeVAO);
@@ -87,7 +91,6 @@ int main(int argc, char const *argv[])
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float))); //texture
 
     // SCREEN Quad VAO and VBO
-    unsigned int quadVAO, quadVBO;
     glGenVertexArrays(1, &quadVAO);
     glGenBuffers(1, &quadVBO);
     glBindVertexArray(quadVAO);
@@ -99,7 +102,6 @@ int main(int argc, char const *argv[])
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float))); //texture
 
     //Framebuffer for Video Target - Video Texture
-    unsigned int video_rbo;
     glGenFramebuffers(1, &video_framebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, video_framebuffer);
     // create a color attachment texture
@@ -109,16 +111,10 @@ int main(int argc, char const *argv[])
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, video_textureColorbuffer, 0);
-    // create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
-    glGenRenderbuffers(1, &video_rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, video_rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, fbo_width, fbo_height);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, video_rbo);
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         std::cout << "ERROR::FRAMEBUFFER:: VIDEO Framebuffer #" << video_framebuffer << "is not complete!" << std::endl;
 
     //Framebuffer for Screen Target - Main Screen
-    unsigned int screen_rbo;
     glGenFramebuffers(1, &screen_framebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, screen_framebuffer);
     // create a color attachment texture
@@ -147,21 +143,31 @@ int main(int argc, char const *argv[])
         {MPV_RENDER_PARAM_OPENGL_FBO, &mpv_fbo},
         {MPV_RENDER_PARAM_FLIP_Y, &flip_y},
         {MPV_RENDER_PARAM_INVALID, nullptr}};
-
+        
     while (!glfwWindowShouldClose(window))
     {
+        fcount++;
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+        if (fcount % 100 == 0)
+            std::cout << "FPS: " << 1 / deltaTime << "\n"
+                      << std::endl;
         processGLFWInput(window);
         // -----
 
-        mpv_render_context_render(mpv_ctx, params_fbo); // this "renders" to the video_framebuffer "linked by ID" in the params_fbo - BLOCKING
-
+        if (wakeup)
+        {
+            if ((mpv_render_context_update(mpv_ctx) & MPV_RENDER_UPDATE_FRAME))
+            {
+                mpv_render_context_render(mpv_ctx, params_fbo); // this "renders" to the video_framebuffer "linked by ID" in the params_fbo - BLOCKING
+                glViewport(0, 0, window_width, window_height);  // we have to set the Viewport on every cycle because mpv_render_context_render internally rescales the fb of the context(?!)...
+            }
+        }
         // **************** RENDER TO THE SCREEN FBO
         glBindFramebuffer(GL_FRAMEBUFFER, screen_framebuffer); // <-- BIND THE SCREEN FBO
         glEnable(GL_DEPTH_TEST);
-        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);                   // RED BACKGROUND
+        glClearColor(1.0f, 0.0f, 0.0f, 1.0f); // RED BACKGROUND
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         cubeShader.use(); // <-- The CUBE SHADER
@@ -170,7 +176,9 @@ int main(int argc, char const *argv[])
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)window_width / (float)window_height, 0.1f, 100.0f);
         cubeShader.setMat4("view", view);
         cubeShader.setMat4("projection", projection);
-        model = glm::rotate(model, currentFrame, glm::vec3(sin(currentFrame / 10.), cos(currentFrame / 10.), sin(currentFrame / 10.) * cos(currentFrame / 10.)));
+        if (animation)
+            model = glm::rotate(model, currentFrame, glm::vec3(sin(currentFrame / 10.), cos(currentFrame / 10.), sin(currentFrame / 10.) * cos(currentFrame / 10.)));
+
         glBindVertexArray(cubeVAO); // <-- The CUBE
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, video_textureColorbuffer); // <-- VIDEO Colorbuffer IS THE TEXTURE
@@ -178,8 +186,11 @@ int main(int argc, char const *argv[])
         cubeShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36); // CUBE 1
 
-        model = glm::rotate(model, currentFrame, glm::vec3(sin(currentFrame / 3.), cos(currentFrame / 7.), sin(currentFrame / 11.) * cos(currentFrame / 2.)));
-        model = glm::translate(model, glm::vec3(1 * sin(currentFrame / 2.0), sin(currentFrame / 13.0), 1 * sin(currentFrame / 53.0)));
+        if (animation)
+        {
+            model = glm::rotate(model, currentFrame, glm::vec3(sin(currentFrame / 3.), cos(currentFrame / 7.), sin(currentFrame / 11.) * cos(currentFrame / 2.)));
+            model = glm::translate(model, glm::vec3(1 * sin(currentFrame / 2.0), sin(currentFrame / 13.0), 1 * sin(currentFrame / 53.0)));
+        }
         cubeShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36); // CUBE 2
 
@@ -193,7 +204,8 @@ int main(int argc, char const *argv[])
         screenShader->use();
         // screenShader.use(); // <-- The SCREEN SHADER
         model = glm::mat4(1.0f);
-        model = glm::scale(model, glm::vec3(sin(currentFrame / 10.0), sin(currentFrame / 10.0), 0.0f));
+        if (animation)
+            model = glm::scale(model, glm::vec3(sin(currentFrame / 10.0), sin(currentFrame / 10.0), 0.0f));
 
         // screenShader.setMat4("model", model);
         screenShader->setMat4("model", model);
@@ -203,10 +215,17 @@ int main(int argc, char const *argv[])
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         // -----
+        if (wakeup)
+        {
+            mpv_render_context_report_swap(mpv_ctx);
+            wakeup = 0;
+        }
         glfwSwapBuffers(window);
         glfwPollEvents();
+        usleep(10000); // we LIMIT the main render loop to 100FPS! If VSYSNC is enabled the limit is the VSYNC limit (~60fps)
     }
-
+    mpv_render_context_free(mpv_ctx);
+    mpv_detach_destroy(mpv);
     glfwTerminate();
     return 0;
 }
@@ -216,6 +235,11 @@ void processGLFWInput(GLFWwindow *window)
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_FALSE);
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        animation = false;
+    else
+        animation = true;
 }
 
 // Returns the address of the specified function (name) for the given context (ctx)
@@ -227,10 +251,22 @@ static void *get_proc_address(void *ctx, const char *name)
 
 static void on_mpv_render_update(void *ctx)
 {
-    // std::cout << "INFO::" << __func__ << std::endl;
+    // we set the wakeup flag here to enable the mpv_render_context_render path in the main loop.
+    wakeup = 1;
 }
 
 static void on_mpv_events(void *ctx)
 {
     // std::cout << "INFO::" << __func__ << std::endl;
+}
+
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+{
+    // we have to rescale the Texture and renderbuffer storage.
+    window_height = height;
+    window_width = width;
+    glBindTexture(GL_TEXTURE_2D, screen_textureColorbuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_width, window_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glBindRenderbuffer(GL_RENDERBUFFER, screen_rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, window_width, window_height);
 }

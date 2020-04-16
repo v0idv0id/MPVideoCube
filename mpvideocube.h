@@ -11,6 +11,7 @@
 #include <mpv/client.h>
 #include <mpv/render_gl.h>
 
+#include <unistd.h>
 #include <shader.h>
 #include <camera.h>
 
@@ -29,12 +30,19 @@ unsigned int video_textureColorbuffer;
 unsigned int screen_framebuffer;
 unsigned int screen_textureColorbuffer;
 
-float deltaTime, lastFrame;
+unsigned int screen_rbo;
+unsigned int video_rbo;
+unsigned int quadVAO, quadVBO;
+unsigned int cubeVAO, cubeVBO;
 
+float deltaTime, lastFrame;
+unsigned int fcount = 0;
+bool animation=true;
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
 static void *get_proc_address(void *ctx, const char *name);
 void processGLFWInput(GLFWwindow *window);
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
 float cubeVertices[] = {
     // positions          // texture Coords
@@ -90,10 +98,7 @@ float quadVertices[] = {
     1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
     1.0f, 1.0f, 0.0f, 1.0f, 1.0f};
 
-
 static void on_mpv_render_update(void *ctx);
 static void on_mpv_events(void *ctx);
-
-
-
+unsigned int wakeup = 0;
 #endif
