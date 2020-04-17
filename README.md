@@ -32,7 +32,7 @@ Click on the image below to see the screen capture video of the program on youtu
   * The CUBE is spinning and moving
   * The QUAD is scaled 
 
-* Whenever there is a new frame ready to render ```on_mpv_render_update``` will be called which sets the ```wakeup``` flag. This enables the  ```mpv_render_context_render``` path in the main loop. Please note that we have to call the ```glViewport``` every time after the ```mpv_render_context_render()``` in order to avoid strange FBO rescaling. Since the main render loop which renders the cube and the screen loop independet of the blocking ```mpv_render_context_render()``` function the framerate is locked by the programmatic 100fps or the vsync. So a low FPS video does not make the main loop slower.
+* Whenever there is a new frame ready to render ```on_mpv_render_update``` will be called which sets the ```wakeup``` flag. This enables the  ```mpv_render_context_render``` path in the main loop. Please note that we have to call the ```glViewport``` every time after the ```mpv_render_context_render()``` in order to avoid strange FBO rescaling. Since the main render loop which renders the cube and the screen loop independet of the blocking ```mpv_render_context_render()``` function the framerate is locked by the programmatic 100fps or the vsync. So a low FPS video does not make the main loop slower. To test the independent FPS use the ```rundemo-video-1080p-5fps.sh``` 
 
 
 ## Dependencies
@@ -52,8 +52,9 @@ I recommend compile mpv from scratch using https://github.com/mpv-player/mpv-bui
 * To compile the demonstration just use:
   * ``` make  ```
 * To run it, use the demonstration commands or your own video file:
-  * ``` ./rundemo-video-2160p-60p.sh ``` (a 4K video)
-  * ``` ./rundemo-video-1080p-60p.sh ``` (a FullHD video)
+  * ``` ./rundemo-video-2160p-60p.sh ``` (a 4K video @ 60fps)
+  * ``` ./rundemo-video-1080p-60p.sh ``` (a FullHD video  @ 60fps)
+  * ``` ./rundemo-video-1080p-5p.sh ``` (a FullHD video  @ 5fps)
   * ``` ./rundemo-youtube.sh ```  (This only works if youtube-dl is installed and working!)
   * ``` ./mpvideocube myvideofile.mp4 ``` (try with your own video files)
 
